@@ -37,3 +37,16 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = { getUsers, getUser, updateUser, deleteUser };
+
+
+const createUser = async (req, res) => {
+  try {
+    const { name, email, password, role, phone, avatar } = req.body;
+    const user = await usersService.createUser({ name, email, password, role, phone, avatar });
+    res.status(201).json({ user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports = { getUsers, getUser, updateUser, deleteUser, createUser };

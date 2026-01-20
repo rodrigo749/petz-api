@@ -92,7 +92,7 @@ Edite o arquivo `.env` com suas credenciais:
 
 ```env
 # Server Configuration
-PORT=3000
+PORT=5000
 NODE_ENV=development
 
 # Database Configuration
@@ -106,7 +106,7 @@ DB_PASSWORD=
 JWT_SECRET=your_jwt_secret_key_here_change_in_production
 
 # API Configuration
-API_URL=http://localhost:3000
+API_URL=http://localhost:5000
 ```
 
 4. **Inicie o servidor:**
@@ -115,7 +115,7 @@ API_URL=http://localhost:3000
 npm run dev
 ```
 
-O servidor estará disponível em `http://localhost:3000`
+O servidor estará disponível em `http://localhost:5000`
 
 ## 📦 Scripts Disponíveis
 
