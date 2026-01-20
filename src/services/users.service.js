@@ -52,15 +52,27 @@ const createUser = async (userData) => {
   const existingUser = await models.User.findOne({ where: { email: userData.email } });
 
   if (existingUser) {
-    throw new Error('Email already in use');
+    const err = new Error('Email already in use');
+    err.statusCode = 409;
+    throw err;
   }
 
   if (userData.password) {
     userData.password = hashPassword(userData.password);
   }
 
-  const user = await models.User.create(userData);
-  return user;
+  try {
+    const user = await models.User.create(userData);
+    return user;
+  } catch (e) {
+    // Handle unique constraint errors from Sequelize
+    if (e.name === 'SequelizeUniqueConstraintError') {
+      const err = new Error('Email already in use');
+      err.statusCode = 409;
+      throw err;
+    }
+    throw e;
+  }
 };
 
 module.exports = { getAllUsers, getUserById, updateUser, deleteUser, createUser };

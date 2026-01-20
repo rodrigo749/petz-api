@@ -1,5 +1,6 @@
 const usersService = require('../services/users.service');
 const generateToken = require('../utils/generateToken');
+require('dotenv').config();
 
 const getOngs = async (req, res) => {
   try {
@@ -62,11 +63,17 @@ const createOng = async (req, res) => {
   // prepare response without password and include token
   const ongObj = ong.toJSON ? ong.toJSON() : ong;
   if (ongObj.password) delete ongObj.password;
-  const token = generateToken({ id: ongObj.id, email: ongObj.email, role: 'ong' });
+    // If JWT_SECRET is not set, skip token generation to allow manual tests
+    if (!process.env.JWT_SECRET) {
+      return res.status(201).json({ user: ongObj });
+    }
 
-  res.status(201).json({ token, user: ongObj });
+    const token = generateToken({ id: ongObj.id, email: ongObj.email, role: 'ong' });
+
+    res.status(201).json({ token, user: ongObj });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const status = error.statusCode || 400;
+    res.status(status).json({ error: error.message });
   }
 };
 
