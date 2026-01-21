@@ -1,24 +1,29 @@
 require('dotenv').config();
+const cors = require('cors'); // <-- Faltava essa linha!
 const app = require('./app');
 const { testConnection, sequelize } = require('./config/db');
 const { syncDB } = require('./database');
 
-const PORT = process.env.PORT || 5000;
+// Force 5000 se o .env não estiver lendo, para não bater com o Next.js (3000)
+const PORT = 5000;
+
+// Configuração correta do CORS
+app.use(cors({
+  origin: "http://localhost:3000", // Permite apenas seu Frontend
+  credentials: true
+}));
 
 const startServer = async () => {
   try {
-    // Test database connection
     await testConnection();
-
-    // Sync database models
     await syncDB();
 
-    // Start the server
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      // Log modificado para você clicar no link e testar
+      console.log(`✅ Backend rodando em: http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Falha ao iniciar o servidor:', error);
     process.exit(1);
   }
 };
