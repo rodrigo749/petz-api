@@ -1,4 +1,4 @@
-const usersService = require('../services/users.service');
+const usersService = require('../services/usersOng.service');
 const generateToken = require('../utils/generateToken');
 require('dotenv').config();
 
