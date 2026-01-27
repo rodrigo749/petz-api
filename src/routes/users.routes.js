@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const usersController = require('../controllers/usersOng.controller');
+const multer = require('multer');
 
-// CORREÇÃO: O nome do arquivo no require deve ser igual ao da sua pasta (UsersUsuario.controller)
-const userController = require('../controllers/UsersUsuario.controller');
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Rota POST http://localhost:5000/api/users
-router.post('/', userController.create);
+// exemplo: POST /api/users (ajuste o caminho conforme seu arquivo atual)
+router.post('/', upload.single('avatar'), usersController.createUser);
 
 module.exports = router;

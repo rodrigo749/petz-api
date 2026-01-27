@@ -39,8 +39,25 @@ const deleteUser = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, role, phone, avatar } = req.body;
-    const user = await usersService.createUser({ name, email, password, role, phone, avatar });
+    const { name, email, password, role, phone } = req.body;
+
+    // Converte arquivo recebido via multipart (campo 'avatar') para base64
+    let avatarBase64 = null;
+    if (req.file && req.file.buffer) {
+      avatarBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    } else if (req.body.avatar) {
+      // aceita também se o frontend já mandou base64 no body
+      avatarBase64 = req.body.avatar;
+    }
+
+    const user = await usersService.createUser({
+      name,
+      email,
+      password,
+      role,
+      phone,
+      avatar: avatarBase64
+    });
 
     // Gera token JWT se JWT_SECRET estiver configurado
     let token = null;
