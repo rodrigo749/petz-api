@@ -92,7 +92,7 @@ Edite o arquivo `.env` com suas credenciais:
 
 ```env
 # Server Configuration
-PORT=5000
+PORT=3000
 NODE_ENV=development
 
 # Database Configuration
@@ -115,7 +115,7 @@ API_URL=http://localhost:5000
 npm run dev
 ```
 
-O servidor estará disponível em `http://localhost:5000`
+O servidor estará disponível em `http://localhost:3000`
 
 ## 📦 Scripts Disponíveis
 

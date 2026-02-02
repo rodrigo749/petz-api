@@ -4,12 +4,12 @@ const app = require('./app');
 const { testConnection, sequelize } = require('./config/db');
 const { syncDB } = require('./database');
 
-// Force 5000 se o .env não estiver lendo, para não bater com o Next.js (3000)
-const PORT = 5000;
+// Force 3000 se o .env não estiver lendo, para não bater com o Next.js (3000)
+const PORT = 3000;
 
 // Configuração correta do CORS
 app.use(cors({
-  origin: "http://localhost:3000", // Permite apenas seu Frontend
+  origin: "http://localhost:3001", // Permite apenas seu Frontend
   credentials: true
 }));
 
