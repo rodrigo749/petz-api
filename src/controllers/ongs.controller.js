@@ -1,25 +1,36 @@
-const usersService = require('../services/users.service');
+const ongsService = require('../services/ongs.service');
 const generateToken = require('../utils/generateToken');
+const bcrypt = require('bcryptjs');
+const { models } = require('../database'); // ✅ forma correta
 require('dotenv').config();
 
+/**
+ * LISTAR ONGS
+ */
 const getOngs = async (req, res) => {
   try {
-    const ongs = await usersService.getAllOngs();
-    res.json({ ongs });
+    const ongs = await ongsService.getAllOngs();
+    return res.json({ ongs });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
+/**
+ * BUSCAR ONG POR ID
+ */
 const getOng = async (req, res) => {
   try {
-    const ong = await usersService.getOngById(req.params.id);
-    res.json({ ong });
+    const ong = await ongsService.getOngById(req.params.id);
+    return res.json({ ong });
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    return res.status(404).json({ message: error.message });
   }
 };
 
+/**
+ * CADASTRO DE ONG
+ */
 const createOng = async (req, res) => {
   try {
     const {
@@ -35,46 +46,100 @@ const createOng = async (req, res) => {
       complemento,
       cidade,
       estado,
+      horarioFunc1,
+      horarioFunc2,
       HorarioFunc1,
       HorarioFunc2,
       imagem,
     } = req.body;
 
     const ongData = {
-      name: nome,
+      nome,
       email,
-      password: senha,
-      phone: telefone,
+      senha,
+      telefone,
       celular,
-      cnpj,
-      cep,
+      cnpj: (cnpj || '').replace(/\D/g, '').slice(0, 14),
+      cep: (cep || '').replace(/\D/g, '').slice(0, 8),
       rua,
       numero,
       complemento,
       cidade,
       estado,
-      horario_inicio: HorarioFunc1,
-      horario_fim: HorarioFunc2,
-      avatar: imagem,
+      // ✅ aceita H maiúsculo ou minúsculo
+      horarioFunc1: horarioFunc1 ?? HorarioFunc1 ?? null,
+      horarioFunc2: horarioFunc2 ?? HorarioFunc2 ?? null,
+      imagem,
     };
 
-  const ong = await usersService.createOng(ongData);
+    const ong = await ongsService.createOng(ongData);
 
-  // prepare response without password and include token
-  const ongObj = ong.toJSON ? ong.toJSON() : ong;
-  if (ongObj.password) delete ongObj.password;
-    // If JWT_SECRET is not set, skip token generation to allow manual tests
+    const ongObj = ong.toJSON();
+    delete ongObj.senha;
+
     if (!process.env.JWT_SECRET) {
       return res.status(201).json({ user: ongObj });
     }
 
-    const token = generateToken({ id: ongObj.id, email: ongObj.email, role: 'ong' });
+    const token = generateToken({
+      id: ongObj.id,
+      email: ongObj.email,
+      role: 'ong',
+    });
 
-    res.status(201).json({ token, user: ongObj });
+    return res.status(201).json({ token, user: ongObj });
   } catch (error) {
     const status = error.statusCode || 400;
-    res.status(status).json({ error: error.message });
+    return res.status(status).json({ message: error.message });
   }
 };
 
-module.exports = { getOngs, getOng, createOng };
+/**
+ * LOGIN DE ONG
+ */
+const loginOng = async (req, res) => {
+  try {
+    const { cnpj, senha } = req.body;
+
+    const cnpjDigits = (cnpj || '').replace(/\D/g, '').slice(0, 14);
+
+    const ong = await models.Ong.findOne({
+      where: { cnpj: cnpjDigits },
+    });
+
+    if (!ong) {
+      return res.status(401).json({ message: 'CNPJ ou senha incorretos' });
+    }
+
+    const senhaOk = await bcrypt.compare(senha, ong.senha);
+    if (!senhaOk) {
+      return res.status(401).json({ message: 'CNPJ ou senha incorretos' });
+    }
+
+    const ongObj = ong.toJSON();
+    delete ongObj.senha;
+
+    if (!process.env.JWT_SECRET) {
+      return res.json({ user: ongObj });
+    }
+
+    const token = generateToken({
+      id: ongObj.id,
+      email: ongObj.email,
+      role: 'ong',
+    });
+
+    return res.json({ token, user: ongObj });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erro ao fazer login' });
+  }
+};
+
+module.exports = {
+  getOngs,
+  getOng,
+  createOng,
+  loginOng,
+};
+
