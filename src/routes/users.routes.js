@@ -9,11 +9,8 @@ const {
 
 const router = express.Router();
 
-router.get('/', getUsers);
-router.post('/', createUser);
-router.get('/:id', getUser);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+// CORREÇÃO: O nome do arquivo no require deve ser igual ao da sua pasta (UsersUsuario.controller)
+const userController = require('../controllers/UsersUsuario.controller');
 
 module.exports = router;
 
