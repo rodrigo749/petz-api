@@ -76,7 +76,8 @@ const User = sequelize.define('User', {
     allowNull: true,
   },
 }, {
-  tableName: 'users',
+  // Renomeado para 'ongs' (ONGs)
+  tableName: 'ongs',
   timestamps: true,
 });
 

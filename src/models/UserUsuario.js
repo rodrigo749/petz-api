@@ -40,8 +40,8 @@ const UserUsuario = sequelize.define('UserUsuario', {
     defaultValue: 'usuario',
   },
 }, {
-  // 2. MUDANÇA: Nome da tabela no banco de dados
-  tableName: 'users_usuario', 
+  // 2. MUDANÇA: Nome da tabela no banco de dados (renomeada para 'usuarios')
+  tableName: 'usuarios', 
   timestamps: true,
 });
 
