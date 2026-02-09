@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken');
 
 const generateToken = (payload) => {
-  // O nome aqui deve ser igual ao do arquivo .env
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '1h', // tempo de duração do login
+  // Em vez de process.env.JWT_SECRET, você coloca a string direto
+  const secret = "SuaPalavraSecretaAqui123"; 
+  
+  return jwt.sign(payload, secret, {
+    expiresIn: '7d', 
   });
 };
 
