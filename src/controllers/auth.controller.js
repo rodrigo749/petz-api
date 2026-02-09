@@ -2,16 +2,27 @@ const authService = require('../services/auth.service');
 
 const login = async (req, res) => {
   try {
-    // aceita cpf OU email
+    console.log("--- TENTATIVA DE LOGIN ---");
+    console.log("1. Body recebido:", req.body); // Mostra o que chegou do front
+
     const { cpf, email, password } = req.body;
 
-    const { token, user } = await authService.login({ cpf, email, password });
+    // Chama o serviço
+    const result = await authService.login({ cpf, email, password });
+    
+    console.log("2. Login sucesso para:", result.user.email);
+    return res.status(200).json(result);
 
-    // retorna token + user (sem senha)
-    return res.status(200).json({ token, user });
   } catch (error) {
-    // mensagem genérica por segurança
-    return res.status(401).json({ error: 'Credenciais inválidas' });
+    console.error("--- ERRO NO LOGIN ---");
+    console.error("Mensagem de erro:", error.message);
+    
+    // Se for erro de banco de dados, vai aparecer aqui:
+    if (error.original) {
+        console.error("Erro SQL:", error.original); 
+    }
+
+    return res.status(401).json({ error: error.message || 'Erro na autenticação' });
   }
 };
 
