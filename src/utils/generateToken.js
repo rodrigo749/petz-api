@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
 const generateToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  // O nome aqui deve ser igual ao do arquivo .env
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: '1h', // tempo de duração do login
+  });
 };
 
 module.exports = generateToken;

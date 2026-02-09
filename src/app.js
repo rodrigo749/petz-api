@@ -11,8 +11,8 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 // 3. Servir arquivos estáticos (Essencial para as fotos aparecerem no navegador)

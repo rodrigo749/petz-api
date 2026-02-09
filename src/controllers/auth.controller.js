@@ -1,4 +1,3 @@
-const { use } = require('react');
 const authService = require('../services/auth.service');
 
 const login = async (req, res) => {
@@ -9,8 +8,6 @@ const login = async (req, res) => {
     const { token, user } = await authService.login({ cpf, email, password });
 
     // retorna token + user (sem senha)
-    console.log (token)
-    console.log(user)
     return res.status(200).json({ token, user });
   } catch (error) {
     // mensagem genérica por segurança
