@@ -31,11 +31,16 @@ const Pet = sequelize.define('Pet', {
     type: DataTypes.ENUM('available', 'adopted', 'lost'),
     defaultValue: 'available',
   },
-  
   gender: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
+  // Campos específicos de pet perdido (só preenchidos quando status = 'lost')
   location: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -47,13 +52,21 @@ const Pet = sequelize.define('Pet', {
   reward: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
-    defaultValue: 0,
   },
-  image: {
+
+  // Campos do dono/responsável pelo cadastro
+  userName: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-
+  userType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 }, {
   tableName: 'pets',
   timestamps: true,

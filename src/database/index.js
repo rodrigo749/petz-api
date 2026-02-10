@@ -24,7 +24,7 @@ Object.keys(models).forEach(modelName => {
 // Sync database
 const syncDB = async () => {
   try {
-    await sequelize.sync({ force: false }); // Set force: true to drop and recreate tables
+    await sequelize.sync({ alter: true }); // Adiciona colunas novas automaticamente sem recriar tabelas
     console.log('Database synchronized successfully.');
   } catch (error) {
     console.error('Error synchronizing database:', error);
