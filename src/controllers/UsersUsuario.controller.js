@@ -17,6 +17,24 @@ const create = async (req, res) => {
   }
 };
 
+// ↓↓↓ ADICIONADO ↓↓↓
+const login = async (req, res) => {
+  try {
+    const result = await userService.loginUser(req.body);
+    return res.status(200).json({
+      message: 'Login realizado com sucesso!',
+      ...result
+    });
+  } catch (error) {
+    if (error.message.includes('incorretos')) {
+      return res.status(401).json({ message: error.message });
+    }
+    console.error(error);
+    return res.status(500).json({ message: 'Erro interno ao realizar login.' });
+  }
+};
+
 module.exports = {
   create,
+  login, // ← ADICIONADO
 };

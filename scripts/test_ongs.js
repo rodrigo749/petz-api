@@ -16,6 +16,7 @@
       HorarioFunc1: '09:00',
       HorarioFunc2: '18:00',
       imagem: ''
+      
     };
 
     const postRes = await fetch('http://localhost:3000/api/ongs', {

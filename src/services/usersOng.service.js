@@ -12,41 +12,9 @@ const getUserById = async (id) => {
     attributes: { exclude: ['password'] },
   });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
-
+  if (!user) throw new Error('User not found');
   return user;
 };
-
-const updateUser = async (id, userData) => {
-  const user = await models.User.findByPk(id);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  // If password is provided, hash it
-  if (userData.password) {
-    userData.password = hashPassword(userData.password);
-  }
-
-  await user.update(userData);
-  return user;
-};
-
-const deleteUser = async (id) => {
-  const user = await models.User.findByPk(id);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  await user.destroy();
-};
-
-module.exports = { getAllUsers, getUserById, updateUser, deleteUser };
-
 
 const createUser = async (userData) => {
   const existingUser = await models.User.findOne({ where: { email: userData.email } });
@@ -58,14 +26,12 @@ const createUser = async (userData) => {
   }
 
   if (userData.password) {
-    userData.password = hashPassword(userData.password);
+    userData.password = hashPassword(userData.password); // SHA-256
   }
 
   try {
-    const user = await models.User.create(userData);
-    return user;
+    return await models.User.create(userData);
   } catch (e) {
-    // Handle unique constraint errors from Sequelize
     if (e.name === 'SequelizeUniqueConstraintError') {
       const err = new Error('Email already in use');
       err.statusCode = 409;
@@ -75,8 +41,25 @@ const createUser = async (userData) => {
   }
 };
 
-module.exports = { getAllUsers, getUserById, updateUser, deleteUser, createUser };
+const updateUser = async (id, userData) => {
+  const user = await models.User.findByPk(id);
+  if (!user) throw new Error('User not found');
 
+  if (userData.password) {
+    userData.password = hashPassword(userData.password); // SHA-256
+  }
+
+  await user.update(userData);
+  return user;
+};
+
+const deleteUser = async (id) => {
+  const user = await models.User.findByPk(id);
+  if (!user) throw new Error('User not found');
+  await user.destroy();
+};
+
+// ONGs (na mesma tabela)
 const getAllOngs = async () => {
   return await models.User.findAll({
     where: { role: 'ong' },
@@ -89,10 +72,7 @@ const getOngById = async (id) => {
     attributes: { exclude: ['password'] },
   });
 
-  if (!user || user.role !== 'ong') {
-    throw new Error('ONG not found');
-  }
-
+  if (!user || user.role !== 'ong') throw new Error('ONG not found');
   return user;
 };
 
@@ -101,4 +81,13 @@ const createOng = async (ongData) => {
   return await createUser(ongData);
 };
 
-module.exports = { getAllUsers, getUserById, updateUser, deleteUser, createUser, getAllOngs, getOngById, createOng };
+module.exports = {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  getAllOngs,
+  getOngById,
+  createOng,
+};
