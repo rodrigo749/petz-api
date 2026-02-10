@@ -1,7 +1,21 @@
 const { models } = require('../database');
 
 const getAllPets = async () => {
-  return await models.Pet.findAll();
+  const pets = await models.Pet.findAll();
+  return pets.map(pet => ({
+    id: pet.id,
+    nome: pet.name,
+    raca: pet.breed,
+    genero: pet.gender,
+    idade: pet.age,
+    descricao: pet.description,
+    imagem: pet.image,
+    status: pet.status,
+    local: pet.location,
+    data: pet.dateLost,
+    recompensa: pet.reward,
+    usuarioId: pet.userId, // assuming there's userId
+  }));
 };
 
 const getPetById = async (id) => {

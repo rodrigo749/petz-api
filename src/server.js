@@ -9,7 +9,7 @@ const PORT = 3000;
 
 // Configuração correta do CORS
 app.use(cors({
-  origin: "http://localhost:3001", // Permite apenas seu Frontend
+  origin: ["http://localhost:3001", "http://localhost:3002"], // Permite frontend nas portas 3001 e 3002
   credentials: true
 }));
 
