@@ -5,7 +5,7 @@ const generateToken = (payload) => {
   const secret = "SuaPalavraSecretaAqui123"; 
   
   return jwt.sign(payload, secret, {
-    expiresIn: '7d', 
+    expiresIn: '1h', 
   });
 };
 

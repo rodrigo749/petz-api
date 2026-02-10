@@ -1,8 +1,9 @@
-const UserUsuario = require('../models/UserUsuario'); // usa seu model real
+const UserUsuario = require('../models/UserUsuario'); 
 const { hashPassword, verifyPassword } = require('../utils/hashPassword');
 const generateToken = require('../utils/generateToken');
 
 const sanitizeCpf = (value) => String(value || '').replace(/\D/g, '');
+const sanitizeCnpj = (value) => String(value || '').replace(/\D/g, '');
 const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
 
 const stripPassword = (userInstance) => {
@@ -12,34 +13,41 @@ const stripPassword = (userInstance) => {
   return user;
 };
 
-const login = async ({ cpf, email, password }) => {
+const login = async ({ cpf, email, cnpj, password }) => {
   const cpfLimpo = sanitizeCpf(cpf);
   const emailNorm = normalizeEmail(email);
+  const cnpjLimpo = sanitizeCnpj(cnpj);
 
-  if ((!cpfLimpo && !emailNorm) || !password) {
-    throw new Error('Credenciais inválidas');
+  if ((!cpfLimpo && !emailNorm && !cnpjLimpo) || !password) {
+    throw new Error('Por favor, informe suas credenciais corretamente.');
   }
 
-  const where = cpfLimpo ? { cpf: cpfLimpo } : { email: emailNorm };
+  let where = {};
+  if (cnpjLimpo) {
+    where = { cnpj: cnpjLimpo };
+  } else if (cpfLimpo) {
+    where = { cpf: cpfLimpo };
+  } else {
+    where = { email: emailNorm };
+  }
+
   const user = await UserUsuario.findOne({ where });
 
   if (!user) {
-    throw new Error('Credenciais inválidas');
+    throw new Error('Credenciais inválidas. Verifique os dados e tente novamente.');
   }
 
-  // verifyPassword precisa ser async (ver utils/hashPassword)
   const passwordMatch = await verifyPassword(password, user.password);
   if (!passwordMatch) {
-    throw new Error('Credenciais inválidas');
+    throw new Error('Credenciais inválidas. Verifique os dados e tente novamente.');
   }
 
   const safeUser = stripPassword(user);
 
   const token = generateToken({
     id: safeUser.id,
-    cpf: safeUser.cpf,
     email: safeUser.email,
-    tipo: safeUser.tipo || 'usuario',
+    tipo: safeUser.tipo || (cnpjLimpo ? 'ong' : 'usuario'),
   });
 
   return { token, user: safeUser };
@@ -49,21 +57,21 @@ const register = async ({ name, email, password }) => {
   const emailNorm = normalizeEmail(email);
 
   if (!name || !emailNorm || !password) {
-    throw new Error('Dados inválidos');
+    throw new Error('Dados inválidos para cadastro.');
   }
 
   const existingUser = await UserUsuario.findOne({ where: { email: emailNorm } });
   if (existingUser) {
-    throw new Error('Email já cadastrado.');
+    throw new Error('Este e-mail já está cadastrado.');
   }
 
   const hashedPassword = await hashPassword(password);
 
   const user = await UserUsuario.create({
-    nome: name,          // seu model usa "nome"
+    nome: name,
     email: emailNorm,
     password: hashedPassword,
-    // cpf/telefone podem ser obrigatórios no seu model — se for, mantenha register do UserUsuario.service
+    tipo: 'usuario' 
   });
 
   return stripPassword(user);

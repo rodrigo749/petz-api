@@ -2,27 +2,25 @@ const authService = require('../services/auth.service');
 
 const login = async (req, res) => {
   try {
-    console.log("--- TENTATIVA DE LOGIN ---");
-    console.log("1. Body recebido:", req.body); // Mostra o que chegou do front
+    console.log("--- NOVA TENTATIVA DE ACESSO ---");
+    console.log("Dados recebidos:", req.body);
 
-    const { cpf, email, password } = req.body;
+    const { cpf, email, password, cnpj } = req.body;
 
-    // Chama o serviço
-    const result = await authService.login({ cpf, email, password });
-    
-    console.log("2. Login sucesso para:", result.user.email);
+    const result = await authService.login({ cpf, email, password, cnpj });
+
+    console.log(`Login realizado com sucesso! ID: ${result.user.id}`);
+
     return res.status(200).json(result);
 
   } catch (error) {
-    console.error("--- ERRO NO LOGIN ---");
-    console.error("Mensagem de erro:", error.message);
+    console.error("Erro no processo de login:", error.message);
     
-    // Se for erro de banco de dados, vai aparecer aqui:
     if (error.original) {
-        console.error("Erro SQL:", error.original); 
+      console.error("Detalhes do erro no Banco de Dados:", error.original.message);
     }
 
-    return res.status(401).json({ error: error.message || 'Erro na autenticação' });
+    return res.status(401).json({ error: error.message });
   }
 };
 
@@ -30,8 +28,10 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const user = await authService.register({ name, email, password });
+    
     return res.status(201).json({ user });
   } catch (error) {
+    console.error("Erro no registro:", error.message);
     return res.status(400).json({ error: error.message });
   }
 };
