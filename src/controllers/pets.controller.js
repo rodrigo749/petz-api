@@ -20,9 +20,12 @@ const getPet = async (req, res) => {
 
 const createPet = async (req, res) => {
   try {
+    console.log('Creating pet with data:', req.body);
     const pet = await petsService.createPet(req.body);
+    console.log('Pet created:', pet);
     res.status(201).json({ pet });
   } catch (error) {
+    console.error('Error creating pet:', error);
     res.status(400).json({ error: error.message });
   }
 };

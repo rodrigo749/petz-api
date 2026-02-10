@@ -13,7 +13,7 @@ const Pet = sequelize.define('Pet', {
   },
   species: {
     type: DataTypes.ENUM('dog', 'cat'),
-    allowNull: false,
+    allowNull: true,
   },
   breed: {
     type: DataTypes.STRING,
@@ -31,14 +31,29 @@ const Pet = sequelize.define('Pet', {
     type: DataTypes.ENUM('available', 'adopted', 'lost'),
     defaultValue: 'available',
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-  model: 'usuarios',
-      key: 'id',
-    },
+  
+  gender: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
+  location: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  dateLost: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  reward: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0,
+  },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
 }, {
   tableName: 'pets',
   timestamps: true,
