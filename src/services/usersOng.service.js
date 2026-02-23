@@ -11,7 +11,6 @@ const getUserById = async (id) => {
   const user = await models.User.findByPk(id, {
     attributes: { exclude: ['password'] },
   });
-
   if (!user) throw new Error('User not found');
   return user;
 };
@@ -26,7 +25,8 @@ const createUser = async (userData) => {
   }
 
   if (userData.password) {
-    userData.password = hashPassword(userData.password); // SHA-256
+    // CORREÇÃO: Adicionado await pois hashPassword é async
+    userData.password = await hashPassword(String(userData.password));
   }
 
   try {
@@ -46,7 +46,8 @@ const updateUser = async (id, userData) => {
   if (!user) throw new Error('User not found');
 
   if (userData.password) {
-    userData.password = hashPassword(userData.password); // SHA-256
+    // CORREÇÃO: Adicionado await
+    userData.password = await hashPassword(String(userData.password));
   }
 
   await user.update(userData);
@@ -59,7 +60,7 @@ const deleteUser = async (id) => {
   await user.destroy();
 };
 
-// ONGs (na mesma tabela)
+// ONGs (Utiliza a mesma lógica de usuário, mas força o role 'ong')
 const getAllOngs = async () => {
   return await models.User.findAll({
     where: { role: 'ong' },
@@ -71,7 +72,6 @@ const getOngById = async (id) => {
   const user = await models.User.findByPk(id, {
     attributes: { exclude: ['password'] },
   });
-
   if (!user || user.role !== 'ong') throw new Error('ONG not found');
   return user;
 };

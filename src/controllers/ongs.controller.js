@@ -25,7 +25,7 @@ const createOng = async (req, res) => {
     const {
       nome,
       email,
-      senha,
+      senha, // Vindo do frontend
       telefone,
       celular,
       cnpj,
@@ -40,10 +40,11 @@ const createOng = async (req, res) => {
       imagem,
     } = req.body;
 
+    // Mapeamento De -> Para
     const ongData = {
       name: nome,
       email,
-      password: senha,
+      password: String(senha || ""), // Garante que seja string para o Service
       phone: telefone,
       celular,
       cnpj,
@@ -58,12 +59,11 @@ const createOng = async (req, res) => {
       avatar: imagem,
     };
 
-  const ong = await usersService.createOng(ongData);
+    const ong = await usersService.createOng(ongData);
 
-  // prepare response without password and include token
-  const ongObj = ong.toJSON ? ong.toJSON() : ong;
-  if (ongObj.password) delete ongObj.password;
-    // If JWT_SECRET is not set, skip token generation to allow manual tests
+    const ongObj = ong.toJSON ? ong.toJSON() : ong;
+    if (ongObj.password) delete ongObj.password;
+
     if (!process.env.JWT_SECRET) {
       return res.status(201).json({ user: ongObj });
     }
