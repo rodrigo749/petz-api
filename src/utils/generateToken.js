@@ -1,8 +1,12 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
 const generateToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  // Em vez de process.env.JWT_SECRET, você coloca a string direto
+  const secret = "SuaPalavraSecretaAqui123"; 
+  
+  return jwt.sign(payload, secret, {
+    expiresIn: '1h', 
+  });
 };
 
 module.exports = generateToken;
