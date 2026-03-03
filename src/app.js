@@ -5,6 +5,7 @@ const usersRoutes = require('./routes/users.routes');
 const petsRoutes = require('./routes/pets.routes');
 const authRoutes = require('./routes/auth.routes');
 const uploadsRoutes = require('./routes/uploads.routes'); // 2. Importe a nova rota de upload
+const adminRoutes = require('./routes/admin.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/pets', petsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadsRoutes); // 4. Registre a rota de upload aqui
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use(errorMiddleware);
