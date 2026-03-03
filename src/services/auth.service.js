@@ -1,9 +1,8 @@
-const UserUsuario = require('../models/UserUsuario'); 
+const UserUsuario = require('../models/UserUsuario');
 const { hashPassword, verifyPassword } = require('../utils/hashPassword');
 const generateToken = require('../utils/generateToken');
 
 const sanitizeCpf = (value) => String(value || '').replace(/\D/g, '');
-const sanitizeCnpj = (value) => String(value || '').replace(/\D/g, '');
 const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
 
 const stripPassword = (userInstance) => {
@@ -13,25 +12,21 @@ const stripPassword = (userInstance) => {
   return user;
 };
 
-const login = async ({ cpf, email, cnpj, password }) => {
+const login = async ({ cpf, email, password }) => {
   const cpfLimpo = sanitizeCpf(cpf);
   const emailNorm = normalizeEmail(email);
-  const cnpjLimpo = sanitizeCnpj(cnpj);
 
-  if ((!cpfLimpo && !emailNorm && !cnpjLimpo) || !password) {
+  if ((!cpfLimpo && !emailNorm) || !password) {
     throw new Error('Por favor, informe suas credenciais corretamente.');
   }
 
-  let where = {};
-  if (cnpjLimpo) {
-    where = { cnpj: cnpjLimpo };
-  } else if (cpfLimpo) {
-    where = { cpf: cpfLimpo };
-  } else {
-    where = { email: emailNorm };
-  }
+  let user = null;
 
-  const user = await UserUsuario.findOne({ where });
+  if (cpfLimpo) {
+    user = await UserUsuario.findOne({ where: { cpf: cpfLimpo } });
+  } else if (emailNorm) {
+    user = await UserUsuario.findOne({ where: { email: emailNorm } });
+  }
 
   if (!user) {
     throw new Error('Credenciais inválidas. Verifique os dados e tente novamente.');
@@ -47,34 +42,35 @@ const login = async ({ cpf, email, cnpj, password }) => {
   const token = generateToken({
     id: safeUser.id,
     email: safeUser.email,
-    tipo: safeUser.tipo || (cnpjLimpo ? 'ong' : 'usuario'),
+    tipo: 'usuario',
   });
 
   return { token, user: safeUser };
 };
 
-const register = async ({ name, email, password }) => {
+const register = async ({ nome, email, password }) => {
   const emailNorm = normalizeEmail(email);
 
-  if (!name || !emailNorm || !password) {
-    throw new Error('Dados inválidos para cadastro.');
+  if (!nome || !emailNorm || !password) {
+    throw new Error('Nome, email e senha são obrigatórios.');
   }
 
   const existingUser = await UserUsuario.findOne({ where: { email: emailNorm } });
   if (existingUser) {
-    throw new Error('Este e-mail já está cadastrado.');
+    throw new Error('Email já cadastrado.');
   }
 
   const hashedPassword = await hashPassword(password);
 
-  const user = await UserUsuario.create({
-    nome: name,
+  const created = await UserUsuario.create({
+    nome,
     email: emailNorm,
     password: hashedPassword,
-    tipo: 'usuario' 
   });
 
-  return stripPassword(user);
+  const user = created.toJSON();
+  delete user.password;
+  return user;
 };
 
 module.exports = { login, register };

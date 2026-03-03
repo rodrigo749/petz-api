@@ -1,26 +1,48 @@
-const UserUsuario = require('../models/UserUsuario'); 
+const UserUsuario = require('../models/UserUsuario');
+const { hashPassword } = require('../utils/hashPassword');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken'); // ← ADICIONADO
+const jwt = require('jsonwebtoken');
+
+const getAllUsers = async () => {
+  return await UserUsuario.findAll({ attributes: { exclude: ['password'] } });
+};
+
+const getUserById = async (id) => {
+  const user = await UserUsuario.findByPk(id, { attributes: { exclude: ['password'] } });
+  if (!user) throw new Error('User not found');
+  return user;
+};
 
 const createUser = async (userData) => {
   const existingUser = await UserUsuario.findOne({ where: { email: userData.email } });
   if (existingUser) throw new Error('Email já cadastrado.');
 
-  const existingCpf = await UserUsuario.findOne({ where: { cpf: userData.cpf } });
-  if (existingCpf) throw new Error('CPF já cadastrado.');
+  if (userData.password) {
+    userData.password = await hashPassword(userData.password);
+  }
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(userData.password, salt);
+  const created = await UserUsuario.create(userData);
+  const obj = created.toJSON();
+  delete obj.password;
+  return obj;
+};
 
-  const newUser = await UserUsuario.create({
-    ...userData,
-    password: hashedPassword,
-  });
+const updateUser = async (id, userData) => {
+  const user = await UserUsuario.findByPk(id);
+  if (!user) throw new Error('User not found');
 
-  const userResponse = newUser.toJSON();
-  delete userResponse.password;
+  if (userData.password) userData.password = await hashPassword(userData.password);
 
-  return userResponse;
+  await user.update(userData);
+  const obj = user.toJSON();
+  delete obj.password;
+  return obj;
+};
+
+const deleteUser = async (id) => {
+  const user = await UserUsuario.findByPk(id);
+  if (!user) throw new Error('User not found');
+  await user.destroy();
 };
 
 // ↓↓↓ ADICIONADO ↓↓↓
@@ -51,6 +73,10 @@ const loginUser = async ({ cpf, password, senha }) => {
 };
 
 module.exports = {
+  getAllUsers,
+  getUserById,
   createUser,
-  loginUser, // ← ADICIONADO
+  updateUser,
+  deleteUser,
+  loginUser, 
 };
