@@ -2,7 +2,8 @@ const petsService = require('../services/pets.service');
 
 const getPets = async (req, res) => {
   try {
-    const pets = await petsService.getAllPets();
+    const { status } = req.query;
+    const pets = await petsService.getAllPets(status);
     res.json({ pets });
   } catch (error) {
     res.status(500).json({ error: error.message });
