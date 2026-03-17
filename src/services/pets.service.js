@@ -4,20 +4,20 @@ const getAllPets = async () => {
   const pets = await models.Pet.findAll();
   return pets.map(pet => ({
     id: pet.id,
-    nome: pet.name,
-    especie: pet.species,
-    raca: pet.breed,
-    genero: pet.gender,
-    idade: pet.age,
-    descricao: pet.description,
-    imagem: pet.image,
+    name: pet.name,
+    species: pet.species,
+    breed: pet.breed,
+    gender: pet.gender,
+    age: pet.age,
+    description: pet.description,
+    image: pet.image,
     status: pet.status,
-    local: pet.location,
-    dataPerdido: pet.dateLost,
-    recompensa: pet.reward,
-    nomeUsuario: pet.userName,
-    tipoUsuario: pet.userType,
-    usuarioId: pet.userId,
+    location: pet.location,
+    dateLost: pet.dateLost,
+    reward: pet.reward,
+    userName: pet.userName,
+    userType: pet.userType,
+    userId: pet.userId,
   }));
 };
 
@@ -30,7 +30,6 @@ const getPetById = async (id) => {
 };
 
 const createPet = async (petData) => {
-  // Campos base válidos para qualquer tipo de pet
   const allowedFields = {
     name: petData.name,
     species: petData.species,
@@ -45,19 +44,23 @@ const createPet = async (petData) => {
     userId: petData.userId,
   };
 
-  // Campos exclusivos de pet perdido — só incluídos se status = 'lost'
   if (petData.status === 'lost') {
     allowedFields.location = petData.location;
     allowedFields.dateLost = petData.dateLost;
     allowedFields.reward = petData.reward;
   }
 
-  // Remove chaves com valor undefined para não enviar colunas desnecessárias
   const cleanData = Object.fromEntries(
     Object.entries(allowedFields).filter(([_, v]) => v !== undefined)
   );
 
-  return await models.Pet.create(cleanData);
+  console.log("Dados limpos para salvar:", cleanData);
+
+  const pet = await models.Pet.create(cleanData);
+
+  console.log("Pet salvo no banco:", pet.toJSON());
+
+  return pet;
 };
 
 const updatePet = async (id, petData) => {
@@ -77,4 +80,10 @@ const deletePet = async (id) => {
   await pet.destroy();
 };
 
-module.exports = { getAllPets, getPetById, createPet, updatePet, deletePet };
+module.exports = {
+  getAllPets,
+  getPetById,
+  createPet,
+  updatePet,
+  deletePet
+};
