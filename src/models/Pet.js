@@ -12,7 +12,7 @@ const Pet = sequelize.define('Pet', {
     allowNull: false,
   },
   species: {
-    type: DataTypes.ENUM('dog', 'cat'),
+    type: DataTypes.ENUM('dog', 'cat','other'),
     allowNull: true,
   },
   breed: {
@@ -28,7 +28,7 @@ const Pet = sequelize.define('Pet', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('available', 'adopted', 'lost'),
+    type: DataTypes.ENUM('available', 'adopted', 'lost', 'found'),
     defaultValue: 'available',
   },
   gender: {
