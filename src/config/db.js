@@ -1,26 +1,21 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'petz_db',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  }
-);
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'mysql',
+  logging: false,
+  dialectOptions: {
+    connectTimeout: 20000,
+  },
+});
 
-// Test the connection
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connection has been established successfully.');
+    console.log('✅ Conexão com banco OK');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
+    throw error;
   }
 };
 
-module.exports = { sequelize, testConnection };
+module.exports = { sequelize, testConnection }; 
