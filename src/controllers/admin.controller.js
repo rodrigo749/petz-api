@@ -13,7 +13,7 @@ const adminLogin = async (req, res) => {
 
     if (email === adminEmail && password === adminPassword) {
       const adminUser = {
-        id: 0,
+        id: 1,
         nome: "Administrador",
         email: adminEmail,
         tipo: "admin",

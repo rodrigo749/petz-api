@@ -36,10 +36,14 @@ const Pet = sequelize.define('Pet', {
     allowNull: true,
   },
   image: {
-    type: DataTypes.STRING,
+    type: DataTypes.BLOB('long'),
     allowNull: true,
   },
-
+ imagemMimeType: {
+    type: DataTypes.STRING, // ex: image/jpeg
+    allowNull: true,
+  },
+  
   // Campos específicos de pet perdido (só preenchidos quando status = 'lost')
   location: {
     type: DataTypes.STRING,
