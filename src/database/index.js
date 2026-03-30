@@ -24,11 +24,13 @@ Object.keys(models).forEach(modelName => {
 // Sync database
 const syncDB = async () => {
   try {
-    await sequelize.sync({ alter: true }); // Adiciona colunas novas automaticamente sem recriar tabelas
+    // Desative o alter para evitar alterações automáticas
+    await sequelize.sync({ alter: false });
     console.log('Database synchronized successfully.');
-  } catch (error) {
-    console.error('Error synchronizing database:', error);
+  } catch (err) {
+    console.error('Error synchronizing database:', err);
+    throw err;
   }
 };
 
-module.exports = { models, syncDB };
+module.exports = { syncDB };
