@@ -4,6 +4,7 @@ const path = require('path'); // 1. Adicione o path para lidar com pastas
 const usersRoutes = require('./routes/users.routes');
 const petsRoutes = require('./routes/pets.routes');
 const authRoutes = require('./routes/auth.routes');
+
 const uploadsRoutes = require('./routes/uploads.routes'); // 2. Importe a nova rota de upload
 const adminRoutes = require('./routes/admin.routes');
 const errorMiddleware = require('./middlewares/error.middleware');
