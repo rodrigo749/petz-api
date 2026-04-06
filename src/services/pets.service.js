@@ -38,6 +38,7 @@ const createPet = async (petData) => {
     description: petData.description,
     gender: petData.gender,
     image: petData.image,
+    imagemMimeType: petData.imagemMimeType,
     status: petData.status || 'available',
     userName: petData.userName,
     userType: petData.userType,
@@ -54,11 +55,11 @@ const createPet = async (petData) => {
     Object.entries(allowedFields).filter(([_, v]) => v !== undefined)
   );
 
-  console.log("Dados limpos para salvar:", cleanData);
+  console.log("Dados limpos para salvar:", { ...cleanData, image: cleanData.image ? '[BLOB]' : null });
 
   const pet = await models.Pet.create(cleanData);
 
-  console.log("Pet salvo no banco:", pet.toJSON());
+  console.log("Pet salvo no banco:", pet.id);
 
   return pet;
 };
@@ -68,7 +69,15 @@ const updatePet = async (id, petData) => {
   if (!pet) {
     throw new Error('Pet not found');
   }
-  await pet.update(petData);
+  
+  // Se uma nova imagem foi enviada, atualiza
+  const updateData = { ...petData };
+  if (petData.image) {
+    updateData.image = petData.image;
+    updateData.imagemMimeType = petData.imagemMimeType;
+  }
+  
+  await pet.update(updateData);
   return pet;
 };
 

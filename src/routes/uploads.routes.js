@@ -1,25 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const Pet = require('../models/Pet');
 
-// Configuração de onde e como o arquivo será salvo
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = './uploads/';
-    // Garante que a pasta existe
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    // Nome único: data + nome original
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configuração do multer para armazenar arquivo em memória
+const storage = multer.memoryStorage();
 
 // Filtro para garantir que apenas imagens sejam enviadas (Segurança)
 const fileFilter = (req, file, cb) => {
@@ -36,24 +21,81 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // Limite de 5MB
 });
 
-// A ROTA: POST /api/upload
-// O campo 'file' deve ser o mesmo usado no seu frontend: fd.append('file', file)
-router.post('/', upload.single('file'), (req, res) => {
+// Rota para criar pet com imagem como BLOB
+// POST /api/upload
+// Body: { name, species, breed, age, description, status, gender, location, dateLost, reward, userName, userType, userId }
+// File: multipart/form-data com campo 'image'
+router.post('/', upload.single('imagem'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
+    const file = req.file;
+    const { name, species, breed, age, description, status, gender, location, dateLost, reward, userName, userType, userId } = req.body;
+
+    console.log('Arquivo recebido:', {
+      filename: file ? file.originalname : null,
+      size: file ? file.size : null,
+      mimetype: file ? file.mimetype : null
+    });
+
+    // Validação básica
+    if (!name) {
+      return res.status(400).json({ message: 'Nome do pet é obrigatório.' });
     }
 
-    // Monta a URL que o frontend vai salvar no banco de dados
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    // Criar o pet com a imagem como BLOB
+    const pet = await Pet.create({
+      name,
+      species: species || null,
+      breed: breed || null,
+      age: age ? parseInt(age) : null,
+      description: description || null,
+      status: status || 'available',
+      gender: gender || null,
+      image: file ? file.buffer : null, // Armazena o buffer como BLOB
+      imagemMimeType: file ? file.mimetype : null, // Armazena o tipo MIME
+      location: location || null,
+      dateLost: dateLost || null,
+      reward: reward || null,
+      userName: userName || null,
+      userType: userType || null,
+      userId: userId ? parseInt(userId) : null,
+    });
 
-    return res.status(200).json({
-      message: 'Upload realizado com sucesso!',
-      url: fileUrl, // Este campo é o que seu frontend lê
-      filename: req.file.filename
+    return res.status(201).json({
+      message: 'Pet criado com sucesso e imagem armazenada como BLOB!',
+      pet: {
+        id: pet.id,
+        name: pet.name,
+        species: pet.species,
+        hasImage: pet.image !== null,
+        imageMimeType: pet.imagemMimeType
+      }
     });
   } catch (error) {
+    console.error('Erro ao criar pet:', error);
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+// Rota para recuperar a imagem de um pet pelo ID
+// GET /api/upload/:id
+router.get('/:id', async (req, res) => {
+  try {
+    const pet = await Pet.findByPk(req.params.id);
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet não encontrado.' });
+    }
+
+    if (!pet.image) {
+      return res.status(404).json({ message: 'Pet não possui imagem.' });
+    }
+
+    // Define o tipo de conteúdo correto e envia o BLOB
+    res.setHeader('Content-Type', pet.imagemMimeType || 'image/jpeg');
+    res.setHeader('Content-Disposition', `inline; filename="pet-${pet.id}.jpg"`);
+    res.send(pet.image);
+  } catch (error) {
+    console.error('Erro ao recuperar imagem:', error);
     return res.status(500).json({ message: error.message });
   }
 });

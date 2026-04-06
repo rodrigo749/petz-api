@@ -22,9 +22,28 @@ const getPet = async (req, res) => {
 const createPet = async (req, res) => {
   try {
     console.log('Creating pet with data:', req.body);
-    const pet = await petsService.createPet(req.body);
-    console.log('Pet created:', pet);
-    res.status(201).json({ pet });
+    
+    // Adiciona imagem como BLOB se enviada
+    const petData = { ...req.body };
+    if (req.file) {
+      petData.image = req.file.buffer;
+      petData.imagemMimeType = req.file.mimetype;
+      console.log('Imagem recebida:', {
+        filename: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+    }
+    
+    const pet = await petsService.createPet(petData);
+    console.log('Pet created:', pet.id);
+    res.status(201).json({ 
+      pet: {
+        ...pet.toJSON(),
+        image: undefined, // Não retorna o BLOB na resposta
+        hasImage: pet.image !== null
+      }
+    });
   } catch (error) {
     console.error('Error creating pet:', error);
     res.status(400).json({ error: error.message });
@@ -33,10 +52,39 @@ const createPet = async (req, res) => {
 
 const updatePet = async (req, res) => {
   try {
-    const pet = await petsService.updatePet(req.params.id, req.body);
-    res.json({ pet });
+    // Adiciona imagem como BLOB se enviada
+    const petData = { ...req.body };
+    if (req.file) {
+      petData.image = req.file.buffer;
+      petData.imagemMimeType = req.file.mimetype;
+    }
+    
+    const pet = await petsService.updatePet(req.params.id, petData);
+    res.json({ 
+      pet: {
+        ...pet.toJSON(),
+        image: undefined,
+        hasImage: pet.image !== null
+      }
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+const getPetImage = async (req, res) => {
+  try {
+    const pet = await petsService.getPetById(req.params.id);
+    
+    if (!pet.image) {
+      return res.status(404).json({ error: 'Pet não possui imagem.' });
+    }
+    
+    res.setHeader('Content-Type', pet.imagemMimeType || 'image/jpeg');
+    res.setHeader('Content-Disposition', `inline; filename="pet-${pet.id}.jpg"`);
+    res.send(pet.image);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
   }
 };
 
@@ -49,4 +97,4 @@ const deletePet = async (req, res) => {
   }
 };
 
-module.exports = { getPets, getPet, createPet, updatePet, deletePet };
+module.exports = { getPets, getPet, createPet, updatePet, deletePet, getPetImage };
