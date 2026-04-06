@@ -25,7 +25,7 @@ const upload = multer({
 // POST /api/upload
 // Body: { name, species, breed, age, description, status, gender, location, dateLost, reward, userName, userType, userId }
 // File: multipart/form-data com campo 'image'
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', upload.single('imagem'), async (req, res) => {
   try {
     const file = req.file;
     const { name, species, breed, age, description, status, gender, location, dateLost, reward, userName, userType, userId } = req.body;

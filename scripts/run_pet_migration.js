@@ -5,7 +5,7 @@ const columnsToAdd = [
   { name: 'location', sql: "VARCHAR(255) NULL" },
   { name: 'dateLost', sql: "DATE NULL" },
   { name: 'reward', sql: "DECIMAL(10, 2) NULL DEFAULT 0" },
-  { name: 'image', sql: "VARCHAR(255) NULL" },
+  { name: 'imagem', sql: "VARCHAR(255) NULL" },
   { name: 'userName', sql: "VARCHAR(255) NULL" },
   { name: 'userType', sql: "VARCHAR(255) NULL" },
   { name: 'userId', sql: "INT NULL" },
