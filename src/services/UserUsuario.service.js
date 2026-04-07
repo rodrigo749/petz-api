@@ -4,11 +4,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const getAllUsers = async () => {
-  return await UserUsuario.findAll({ attributes: { exclude: ['password'] } });
+  const users = await UserUsuario.findAll({ attributes: { exclude: ['password', 'imagem'] } });
+  return users.map(u => {
+    const obj = u.toJSON();
+    obj.hasImage = u.imagem !== null && u.imagem !== undefined;
+    return obj;
+  });
 };
 
 const getUserById = async (id) => {
-  const user = await UserUsuario.findByPk(id, { attributes: { exclude: ['password'] } });
+  const user = await UserUsuario.findByPk(id);
+  if (!user) throw new Error('User not found');
+  const obj = user.toJSON();
+  const hasImage = obj.imagem !== null && obj.imagem !== undefined;
+  delete obj.password;
+  delete obj.imagem; // Não envia blob no JSON
+  obj.hasImage = hasImage;
+  return obj;
+};
+
+const getUserWithImage = async (id) => {
+  const user = await UserUsuario.findByPk(id);
   if (!user) throw new Error('User not found');
   return user;
 };
@@ -23,7 +39,10 @@ const createUser = async (userData) => {
 
   const created = await UserUsuario.create(userData);
   const obj = created.toJSON();
+  const hasImage = obj.imagem !== null && obj.imagem !== undefined;
   delete obj.password;
+  delete obj.imagem; // Não envia blob no JSON
+  obj.hasImage = hasImage;
   return obj;
 };
 
@@ -35,7 +54,10 @@ const updateUser = async (id, userData) => {
 
   await user.update(userData);
   const obj = user.toJSON();
+  const hasImage = obj.imagem !== null && obj.imagem !== undefined;
   delete obj.password;
+  delete obj.imagem; // Não envia blob no JSON
+  obj.hasImage = hasImage;
   return obj;
 };
 
@@ -75,6 +97,7 @@ const loginUser = async ({ cpf, password, senha }) => {
 module.exports = {
   getAllUsers,
   getUserById,
+  getUserWithImage,
   createUser,
   updateUser,
   deleteUser,
