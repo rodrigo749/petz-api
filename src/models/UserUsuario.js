@@ -32,6 +32,10 @@ const UserUsuario = sequelize.define('UserUsuario', {
     allowNull: false,
   },
   imagem: {
+    type: DataTypes.BLOB('long'),
+    allowNull: true,
+  },
+  imagemMimeType: {
     type: DataTypes.STRING,
     allowNull: true,
   },

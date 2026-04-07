@@ -8,7 +8,11 @@ const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
 const stripPassword = (userInstance) => {
   if (!userInstance) return null;
   const user = userInstance.toJSON ? userInstance.toJSON() : { ...userInstance };
+  // Verifica se tem imagem antes de remover
+  const hasImage = user.imagem !== null && user.imagem !== undefined;
   delete user.password;
+  delete user.imagem; // Não envia blob no JSON
+  user.hasImage = hasImage;
   return user;
 };
 

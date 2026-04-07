@@ -2,12 +2,36 @@ const userService = require('../services/UserUsuario.service');
 
 const create = async (req, res) => {
   try {
-    const user = await userService.createUser(req.body);
-    return res.status(201).json({ message: 'Usuário criado com sucesso!', user });
+    const userData = { ...req.body };
+    
+    // Se o Multer processou uma imagem, adiciona o buffer aos dados
+    if (req.file) {
+      console.log('Arquivo recebido:', {
+        filename: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+      userData.imagem = req.file.buffer;
+      userData.imagemMimeType = req.file.mimetype;
+    }
+    
+    console.log('Dados do usuário a criar:', { ...userData, imagem: userData.imagem ? '[BLOB]' : null });
+    
+    const user = await userService.createUser(userData);
+    console.log('Usuário criado com sucesso:', user.id);
+    
+    return res.status(201).json({ 
+      message: 'Usuário criado com sucesso!', 
+      user: {
+        ...user,
+        imagem: undefined,
+        hasImage: userData.imagem !== undefined
+      }
+    });
   } catch (error) {
+    console.error('Erro ao criar usuário:', error);
     if (error.message.includes('já cadastrado')) return res.status(409).json({ message: error.message });
-    console.error(error);
-    return res.status(500).json({ message: 'Erro interno ao criar usuário.' });
+    return res.status(500).json({ message: 'Erro interno ao criar usuário.', error: error.message });
   }
 };
 
@@ -39,17 +63,37 @@ const update = async (req, res) => {
     const { id } = req.params;
     const userData = { ...req.body };
 
-    // Se o Multer processou uma imagem, adicionamos o caminho dela aos dados
+    // Se o Multer processou uma imagem, adiciona o buffer aos dados
     if (req.file) {
-      // Salvamos o caminho relativo para ser acessível via URL
-      userData.imagem = `/uploads/${req.file.filename}`;
+      userData.imagem = req.file.buffer;
+      userData.imagemMimeType = req.file.mimetype;
     }
 
     const updatedUser = await userService.updateUser(id, userData);
-    return res.status(200).json(updatedUser);
+    return res.status(200).json({
+      ...updatedUser,
+      imagem: undefined,
+      hasImage: updatedUser.imagem !== null
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Erro ao atualizar usuário' });
+  }
+};
+
+const getUserImage = async (req, res) => {
+  try {
+    const user = await userService.getUserWithImage(req.params.id);
+    
+    if (!user.imagem) {
+      return res.status(404).json({ error: 'Usuário não possui imagem.' });
+    }
+    
+    res.setHeader('Content-Type', user.imagemMimeType || 'image/jpeg');
+    res.setHeader('Content-Disposition', `inline; filename="user-${user.id}.jpg"`);
+    res.send(user.imagem);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
   }
 };
 
@@ -67,5 +111,6 @@ module.exports = {
   login,
   getById,
   update,
-  remove
+  remove,
+  getUserImage
 };
