@@ -117,7 +117,7 @@ const syncDB = async () => {
     await runAutoMigrations();
     
     // Depois sincroniza os modelos (cria tabelas/colunas novas)
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log('Database synchronized successfully.');
   } catch (error) {
     console.error('Error synchronizing database:', error);

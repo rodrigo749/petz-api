@@ -1,5 +1,6 @@
 const UserUsuario = require('../models/UserUsuario');
 const { hashPassword } = require('../utils/hashPassword');
+const Pet = require('../models/Pet');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -14,15 +15,16 @@ const getAllUsers = async () => {
 
 const getUserById = async (id) => {
   const user = await UserUsuario.findByPk(id);
+  
   if (!user) throw new Error('User not found');
+  
   const obj = user.toJSON();
-  const hasImage = obj.imagem !== null && obj.imagem !== undefined;
+  // Log para ver o nome das colunas no banco
+
   delete obj.password;
-  delete obj.imagem; // Não envia blob no JSON
-  obj.hasImage = hasImage;
+  delete obj.imagem; 
   return obj;
 };
-
 const getUserWithImage = async (id) => {
   const user = await UserUsuario.findByPk(id);
   if (!user) throw new Error('User not found');
@@ -38,14 +40,24 @@ const createUser = async (userData) => {
   }
 
   const created = await UserUsuario.create(userData);
+  
+  // ↓↓↓ ADICIONE ISSO PARA GERAR O TOKEN NO CADASTRO ↓↓↓
+  const token = jwt.sign(
+    { id: created.id, cpf: created.cpf },
+    process.env.JWT_SECRET || 'petz-secret',
+    { expiresIn: '7d' }
+  );
+
   const obj = created.toJSON();
   const hasImage = obj.imagem !== null && obj.imagem !== undefined;
+  
   delete obj.password;
-  delete obj.imagem; // Não envia blob no JSON
+  delete obj.imagem; 
   obj.hasImage = hasImage;
-  return obj;
-};
 
+  // Retorne o token junto com o usuário, igual no login!
+  return { token, user: obj }; 
+};
 const updateUser = async (id, userData) => {
   const user = await UserUsuario.findByPk(id);
   if (!user) throw new Error('User not found');
@@ -64,6 +76,10 @@ const updateUser = async (id, userData) => {
 const deleteUser = async (id) => {
   const user = await UserUsuario.findByPk(id);
   if (!user) throw new Error('User not found');
+
+  // ESSA LINHA É A QUE FAZ O SEU BOTÃO DO FRONT FUNCIONAR:
+  await Pet.destroy({ where: { userId: id } }); 
+
   await user.destroy();
 };
 
