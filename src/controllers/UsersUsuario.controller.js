@@ -4,28 +4,22 @@ const create = async (req, res) => {
   try {
     const userData = { ...req.body };
     
-    // Se o Multer processou uma imagem, adiciona o buffer aos dados
     if (req.file) {
-      console.log('Arquivo recebido:', {
-        filename: req.file.originalname,
-        size: req.file.size,
-        mimetype: req.file.mimetype
-      });
       userData.imagem = req.file.buffer;
       userData.imagemMimeType = req.file.mimetype;
     }
     
-    console.log('Dados do usuário a criar:', { ...userData, imagem: userData.imagem ? '[BLOB]' : null });
+    // O service agora retorna { token, user }
+    const result = await userService.createUser(userData);
     
-    const user = await userService.createUser(userData);
-    console.log('Usuário criado com sucesso:', user.id);
     
+    // Retornamos o objeto completo (que já contém o token e o user)
     return res.status(201).json({ 
       message: 'Usuário criado com sucesso!', 
+      token: result.token, // <--- ISSO AQUI ESTAVA FALTANDO!
       user: {
-        ...user,
-        imagem: undefined,
-        hasImage: userData.imagem !== undefined
+        ...result.user,
+        imagem: undefined // Garante que não enviamos o buffer gigante de volta
       }
     });
   } catch (error) {
@@ -35,17 +29,20 @@ const create = async (req, res) => {
   }
 };
 
+// Exemplo do que deve estar no seu controller de login
 const login = async (req, res) => {
   try {
-    const result = await userService.loginUser(req.body);
-    return res.status(200).json({ message: 'Login realizado com sucesso!', ...result });
+    const { token, user } = await authService.login(req.body);
+    
+    // IMPORTANTE: O nome aqui precisa ser exatamente 'token'
+    return res.status(200).json({ 
+      token: token, 
+      user: user 
+    });
   } catch (error) {
-    if (error.message.includes('incorretos')) return res.status(401).json({ message: error.message });
-    console.error(error);
-    return res.status(500).json({ message: 'Erro interno ao realizar login.' });
+    return res.status(401).json({ message: error.message });
   }
 };
-
 // --- NOVAS FUNÇÕES ABAIXO ---
 
 const getById = async (req, res) => {
