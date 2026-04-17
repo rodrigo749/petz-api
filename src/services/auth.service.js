@@ -52,29 +52,26 @@ const login = async ({ cpf, email, password }) => {
   return { token, user: safeUser };
 };
 
-const register = async ({ nome, email, password }) => {
-  const emailNorm = normalizeEmail(email);
+const register = async (userData) => {
+  const emailNorm = normalizeEmail(userData.email);
 
-  if (!nome || !emailNorm || !password) {
-    throw new Error('Nome, email e senha são obrigatórios.');
-  }
-
+  // 1. Validação de Regra de Negócio (O Controller validará o formato via Zod depois)
   const existingUser = await UserUsuario.findOne({ where: { email: emailNorm } });
-  if (existingUser) {
-    throw new Error('Email já cadastrado.');
-  }
+  if (existingUser) throw new Error('Email já cadastrado.');
 
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = await hashPassword(userData.password);
 
+  // 2. DTO Manual: Aqui blindamos o banco. 
+  // Somente estes campos serão gravados, ignorando "isAdmin" ou "permissoes" extras.
   const created = await UserUsuario.create({
-    nome,
+    nome: userData.nome,
     email: emailNorm,
     password: hashedPassword,
+    cpf: sanitizeCpf(userData.cpf), // Adicionei o CPF no registro se necessário
+    status: 'ativo' // Valor default definido pelo sistema, não pelo usuário
   });
 
-  const user = created.toJSON();
-  delete user.password;
-  return user;
+  return stripPassword(created);
 };
 
 module.exports = { login, register };

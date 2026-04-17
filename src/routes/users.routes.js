@@ -1,4 +1,6 @@
 const express = require('express');
+const validate = require('../middlewares/validate.middleware');
+const { userSchema } = require('../validators/user.validator');
 const router = express.Router();
 const multer = require('multer');
 const userController = require('../controllers/UsersUsuario.controller');
@@ -22,7 +24,11 @@ const upload = multer({
 });
 
 // Criar usuário
-router.post('/', upload.single('imagem'), userController.create);
+router.post('/', 
+  upload.single('imagem'), 
+  validate(userSchema), // Valida antes de chegar no controller
+  userController.create
+);
 
 // Buscar usuário por id
 router.get('/:id', authMiddleware, userController.getById);

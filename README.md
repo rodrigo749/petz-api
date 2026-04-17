@@ -86,27 +86,7 @@ cd petz-api
 npm install
 ```
 
-3. **Configure as variáveis de ambiente:**
 
-Edite o arquivo `.env` com suas credenciais:
-
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=petz_db
-DB_USER=root
-DB_PASSWORD=
-
-# JWT Configuration
-JWT_SECRET=your_jwt_secret_key_here_change_in_production
-
-# API Configuration
-API_URL=http://localhost:5000
 ```
 
 4. **Inicie o servidor:**
