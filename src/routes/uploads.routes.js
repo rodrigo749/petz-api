@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const Pet = require('../models/Pet');
+const prisma = require('../config/prisma');
 
 // Configuração do multer para armazenar arquivo em memória
 const storage = multer.memoryStorage();
@@ -42,7 +42,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
     }
 
     // Criar o pet com a imagem como BLOB
-    const pet = await Pet.create({
+    const pet = await prisma.pet.create({ data: {
       name,
       species: species || null,
       breed: breed || null,
@@ -53,12 +53,12 @@ router.post('/', upload.single('imagem'), async (req, res) => {
       image: file ? file.buffer : null, // Armazena o buffer como BLOB
       imagemMimeType: file ? file.mimetype : null, // Armazena o tipo MIME
       location: location || null,
-      dateLost: dateLost || null,
-      reward: reward || null,
+      dateLost: dateLost ? new Date(dateLost) : null,
+      reward: reward ? Number(reward).toFixed(2) : null,
       userName: userName || null,
       userType: userType || null,
       userId: userId ? parseInt(userId) : null,
-    });
+    }});
 
     return res.status(201).json({
       message: 'Pet criado com sucesso e imagem armazenada como BLOB!',
@@ -80,7 +80,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
 // GET /api/upload/:id
 router.get('/:id', async (req, res) => {
   try {
-    const pet = await Pet.findByPk(req.params.id);
+    const pet = await prisma.pet.findUnique({ where: { id: Number(req.params.id) } });
 
     if (!pet) {
       return res.status(404).json({ message: 'Pet não encontrado.' });

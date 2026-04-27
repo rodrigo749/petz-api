@@ -29,22 +29,6 @@ const create = async (req, res) => {
   }
 };
 
-// Exemplo do que deve estar no seu controller de login
-const login = async (req, res) => {
-  try {
-    const { token, user } = await authService.login(req.body);
-    
-    // IMPORTANTE: O nome aqui precisa ser exatamente 'token'
-    return res.status(200).json({ 
-      token: token, 
-      user: user 
-    });
-  } catch (error) {
-    return res.status(401).json({ message: error.message });
-  }
-};
-// --- NOVAS FUNÇÕES ABAIXO ---
-
 const getById = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
@@ -70,7 +54,7 @@ const update = async (req, res) => {
     return res.status(200).json({
       ...updatedUser,
       imagem: undefined,
-      hasImage: updatedUser.imagem !== null
+      hasImage: updatedUser.hasImage
     });
   } catch (error) {
     console.error(error);
@@ -105,7 +89,6 @@ const remove = async (req, res) => {
 
 module.exports = {
   create,
-  login,
   getById,
   update,
   remove,

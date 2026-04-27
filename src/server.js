@@ -1,14 +1,17 @@
 require('dotenv').config();
 const app = require('./app');
-const { testConnection } = require('./config/db');
-const { syncDB } = require('./database');
+const prisma = require('./config/prisma');
 
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await testConnection();
-    await syncDB();
+    try {
+      await prisma.$connect();
+      console.log('Database connection has been established successfully.');
+    } catch (dbError) {
+      console.warn('Database connection failed on startup, server will continue:', dbError.message);
+    }
 
     app.listen(PORT, () => {
       console.log(`✅ Backend rodando em: http://localhost:${PORT}`);

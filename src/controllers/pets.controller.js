@@ -1,5 +1,11 @@
 const petsService = require('../services/pets.service');
 
+const serializePet = (pet) => ({
+  ...pet,
+  image: undefined,
+  hasImage: pet.image !== null && pet.image !== undefined,
+});
+
 const getPets = async (req, res) => {
   try {
     const { status } = req.query;
@@ -38,11 +44,7 @@ const createPet = async (req, res) => {
     const pet = await petsService.createPet(petData);
     console.log('Pet created:', pet.id);
     res.status(201).json({ 
-      pet: {
-        ...pet.toJSON(),
-        image: undefined, // Não retorna o BLOB na resposta
-        hasImage: pet.image !== null
-      }
+      pet: serializePet(pet)
     });
   } catch (error) {
     console.error('Error creating pet:', error);
@@ -61,11 +63,7 @@ const updatePet = async (req, res) => {
     
     const pet = await petsService.updatePet(req.params.id, petData);
     res.json({ 
-      pet: {
-        ...pet.toJSON(),
-        image: undefined,
-        hasImage: pet.image !== null
-      }
+      pet: serializePet(pet)
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
