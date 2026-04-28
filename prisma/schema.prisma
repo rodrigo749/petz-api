@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PetSpecies {
+  dog
+  cat
+  other
+}
+
+enum PetStatus {
+  available
+  adopted
+  lost
+  found
+}
+
+model UserUsuario {
+  id            Int      @id @default(autoincrement())
+  nome          String
+  email         String   @unique
+  cpf           String   @unique
+  telefone      String
+  password      String
+  imagem        Bytes?
+  imagemMimeType String?
+  tipo          String   @default("usuario")
+  status        String?  @default("ativo")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pets          Pet[]
+
+  @@map("usuarios")
+}
+
+model Pet {
+  id            Int        @id @default(autoincrement())
+  name          String
+  species       PetSpecies?
+  breed         String?
+  age           Int?
+  description   String?
+  status        PetStatus  @default(available)
+  gender        String?
+  image         Bytes?
+  imagemMimeType String?
+  location      String?
+  dateLost      DateTime?
+  reward        Decimal?   @db.Decimal(10, 2)
+  userName      String?
+  userType      String?
+  userId        Int?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user          UserUsuario? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([status])
+  @@index([userId])
+  @@map("pets")
+}

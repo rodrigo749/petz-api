@@ -11,11 +11,39 @@ const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:3000'],
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'https://desabandonefocinhos-front.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+const allowedOriginsFromEnv = (process.env.FRONTEND_URLS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allows tools like curl/Postman or same-origin requests with no Origin header.
+    if (!origin) return callback(null, true);
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      allowedOriginsFromEnv.includes(origin) ||
+      /^https:\/\/desabandonefocinhos-front(-[a-z0-9-]+)?\.vercel\.app$/i.test(origin);
+
+    if (isAllowed) return callback(null, true);
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
-}));
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

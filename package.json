@@ -2,10 +2,13 @@
   "name": "petz-api",
   "version": "1.0.0",
   "description": "🐾 Patas Perdidas\r Sistema web para gestão de ONGs de proteção animal, facilitando o cadastro de organizações, busca de animais perdidos e processo de adoção.",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "db:push": "prisma db push",
+    "start:render": "prisma db push && node src/server.js",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,20 +24,25 @@
   },
   "homepage": "https://github.com/rodrigo749/petz-api#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "firebase": "^12.12.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
-    "mysql2": "^3.15.3",
+    "pg": "^8.20.0",
     "react": "^19.2.4",
-    "sequelize": "^6.37.7"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/node": "^25.6.0",
+    "nodemon": "^3.1.11",
+    "prisma": "^7.8.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=20.0.0"
   }
 }
