@@ -12,10 +12,7 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'https://desabandonefocinhos-front.vercel.app',
+  'https://desabandonefocinhos.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
